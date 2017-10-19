@@ -35,6 +35,41 @@ public class Percolation {
         //Open site in private array and update openSitesCount
         openSitesArray[position] = 1;
         openSitesCount++;
+
+        // Get location
+        Location location = defineLocation(row, col);
+
+        //Get neighbors
+        Neighbor[] neighbors = getNeighbors(row, col, location);
+        for(Neighbor neighbor: neighbors) {
+         int neighborRow = neighbor.getRow();
+         int neighborColumn = neighbor.getColumn();
+
+         //Verify if neighbor is opened
+         if (isOpen(neighborRow, neighborColumn)) {
+
+          int neighborPosition = getPosition(neighborRow, neighborColumn);
+          if (!uf.connected(position, neighborPosition)) {
+           uf.union(position, neighborPosition);
+          }
+          else {
+              System.out.println("ya están conectados");
+         }
+        }
+
+        //Connect with imaginary points 
+        if (location == Location.TOP_LEFT || location == Location.TOP_CENTER || location == Location.TOP_RIGHT) {
+          if (!uf.connected(position, 0)) {
+            uf.union(position, 0);
+          }
+        }
+        else if (location == Location.BOTTOM_LEFT || location == Location.BOTTOM_CENTER || location == Location.BOTTOM_RIGHT) {
+          if (!uf.connected(position, matrixSize + 1)) {
+            uf.union(position, matrixSize + 1);
+          }
+        }
+
+
       }
         
      }
@@ -42,8 +77,9 @@ public class Percolation {
       throw new IllegalArgumentException();
      }
    }
+ }
    
-   public boolean isOpen(int row, int col){  // is site (row, col) open?
+   public boolean isOpen(int row, int col) {  // is site (row, col) open?
      if (validPosition(row, col)) {
         int position = getPosition(row, col);
         return openSitesArray[position] == 1;
@@ -53,14 +89,20 @@ public class Percolation {
      }
    }
    public boolean isFull(int row, int col){  // is site (row, col) full?
-     return true;
+     if (validPosition(row, col)) {
+        int position = getPosition(row, col);
+        return uf.connected(0, position);
+     }
+     else {
+      throw new IllegalArgumentException();
+     }
    }
    
    public int numberOfOpenSites(){       // number of open sites
      return openSites;
    }
    public boolean percolates(){              // does the system percolate?
-     return true;
+     return uf.connected(0, matrixN + 1);
    }
 
    private boolean validPosition(int row, int col) {
@@ -88,7 +130,7 @@ public class Percolation {
     }
 
      private Boolean isLeftTopCorner(int row, int column) {
-        return  row == 1;
+        return  row == 1 && column == 1;
     }
 
     private Boolean isRightTopCorner(int row, int column) {
@@ -104,14 +146,14 @@ public class Percolation {
     }
 
     private Boolean isLeftEdge(int row, int column) {
-        return row == 1;
+        return column == 1;
     }
 
     private Boolean isRightEdge(int row, int column) {
-        return row == matrixN;
+        return column == matrixN;
     }
 
-    public Location defineLocation(int row, int column) {
+    private Location defineLocation(int row, int column) {
         if (isLeftTopCorner(row, column)) {
             return Location.TOP_LEFT;
         }
@@ -184,7 +226,7 @@ public class Percolation {
         return new Neighbor(row, column + 1);
     }
 
-    public Neighbor[] getNeighbors(int row, int column, Location location) {
+    private Neighbor[] getNeighbors(int row, int column, Location location) {
      if (location == Location.TOP_LEFT) {
       return new Neighbor[]{rightNeighbor(row, column), bottomNeighbor(row, column)};
      }
@@ -215,7 +257,7 @@ public class Percolation {
      }
     }
 
-    public static enum Location {
+    private static enum Location {
       TOP_LEFT, TOP_CENTER,TOP_RIGHT, CENTER_LEFT,CENTER, CENTER_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT;
     }
 
@@ -230,46 +272,46 @@ public class Percolation {
 
      //Test2
      //Cambiar clases a publicas
-     Percolation p = new Percolation(5);
-     int topLeft = 1;
-     Location locTopLeft = p.defineLocation(1,0);
-     System.out.println(Arrays.toString(p.getNeighbors(1,0, locTopLeft)));
+     // Percolation p = new Percolation(5);
+     // int topLeft = 1;
+     // Location locTopLeft = p.defineLocation(1,1);
+     // System.out.println(Arrays.toString(p.getNeighbors(1,0, locTopLeft)));
 
-     int topCenter = 2;
-     Location locTopCenter = p.defineLocation(1,1);
-     System.out.println(Arrays.toString(p.getNeighbors(1,1, locTopCenter)));
+     // int topCenter = 2;
+     // Location locTopCenter = p.defineLocation(1,2);
+     // System.out.println(Arrays.toString(p.getNeighbors(1,2, locTopCenter)));
 
-     int topRight = 5;
-     Location locTopRight = p.defineLocation(1,5);
-     System.out.println(Arrays.toString(p.getNeighbors(1,5, locTopRight)));
+     // int topRight = 5;
+     // Location locTopRight = p.defineLocation(1,5);
+     // System.out.println(Arrays.toString(p.getNeighbors(1,5, locTopRight)));
 
-     int bottomLeft = 21;
-     Location locBottomLeft = p.defineLocation(5,1);
-     System.out.println(Arrays.toString(p.getNeighbors(5,1, locBottomLeft)));
+     // int bottomLeft = 21;
+     // Location locBottomLeft = p.defineLocation(5,1);
+     // System.out.println(Arrays.toString(p.getNeighbors(5,1, locBottomLeft)));
 
-     int bottomCenter = 22;
-     Location locBottomCenter = p.defineLocation(5,2);
-     System.out.println(Arrays.toString(p.getNeighbors(5,2, locBottomCenter)));
+     // int bottomCenter = 22;
+     // Location locBottomCenter = p.defineLocation(5,2);
+     // System.out.println(Arrays.toString(p.getNeighbors(5,2, locBottomCenter)));
 
-     int bottomRight = 25;
-     Location locBottomRight = p.defineLocation(5,5);
-     System.out.println(Arrays.toString(p.getNeighbors(5,5, locBottomRight)));
+     // int bottomRight = 25;
+     // Location locBottomRight = p.defineLocation(5,5);
+     // System.out.println(Arrays.toString(p.getNeighbors(5,5, locBottomRight)));
 
-     int centerLeft = 16;
-     Location locCenterLeft = p.defineLocation(2,1);
-     System.out.println(Arrays.toString(p.getNeighbors(2,1, locCenterLeft)));
+     // int centerLeft = 16;
+     // Location locCenterLeft = p.defineLocation(2,1);
+     // System.out.println(Arrays.toString(p.getNeighbors(2,1, locCenterLeft)));
 
-     int center = 17;
-     Location locCenter = p.defineLocation(2,2);
-     System.out.println(Arrays.toString(p.getNeighbors(2,2, locCenter)));
+     // int center = 17;
+     // Location locCenter = p.defineLocation(2,2);
+     // System.out.println(Arrays.toString(p.getNeighbors(2,2, locCenter)));
 
-     int center1 = 13;
-     Location locCenter1 = p.defineLocation(3,3);
-     System.out.println(Arrays.toString(p.getNeighbors(3,3, locCenter1)));
+     // int center1 = 13;
+     // Location locCenter1 = p.defineLocation(3,3);
+     // System.out.println(Arrays.toString(p.getNeighbors(3,3, locCenter1)));
 
 
-     int centerRight = 15;
-     Location locCenterRight = p.defineLocation(2,5);
-     System.out.println(Arrays.toString(p.getNeighbors(2,5, locCenterRight)));
+     // int centerRight = 15;
+     // Location locCenterRight = p.defineLocation(2,5);
+     // System.out.println(Arrays.toString(p.getNeighbors(2,5, locCenterRight)));
    }
 }
